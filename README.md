@@ -51,4 +51,5 @@ git add README.md
 git commit -m "Add project README.md"
 git push
 
-<img width="1228" height="526" alt="image" src="https://github.com/user-attachments/assets/fbb3cb09-5f19-45e7-87c2-dffa46b7c9d9" />
+<img width="920" height="392" alt="image" src="https://github.com/user-attachments/assets/021338f3-7e76-4dac-b0b6-56772f5f582e" />
+
