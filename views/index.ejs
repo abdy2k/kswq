@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="km">
+<html>
+  <head>
+	  <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/ico" href="/images/favicon.ico" />
+    <title><%= title %></title>
+    <!-- Quill CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts for Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Export Helper Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
+
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <!-- Hidden File Input for Image Insertion -->
+    <input type="file" id="image-file-input" accept="image/*" class="hidden" />
+
+    <header id="top-bar" class="bg-white border-b border-slate-200 flex flex-col z-30 shadow-sm">
+      <!-- Main Title & File Controls Bar -->
+      <div class="flex items-center justify-between px-4 py-2 border-b border-slate-100">
+        <div class="flex items-center space-x-3">
+          <!--
+          <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            <i class="fa-solid font-bold fa-file-word"></i>
+          </div>
+          -->
+          <div>
+            <input type="hidden" id="doc-title" value="Document" class="font-semibold text-slate-800 bg-transparent hover:bg-slate-100 px-2 py-0.5 rounded text-base border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-all" />
+            
+            <!-- Menu Bar Items -->
+            <div class="flex items-center space-x-2 text-xs text-slate-600 pl-2 mt-0.5 relative">
+              
+              <!-- File Menu Dropdown trigger -->
+              <div class="relative">
+                <button id="file-menu-btn" class="hover:bg-slate-100 px-2 py-0.5 rounded font-medium flex items-center space-x-1">
+                  <span>File</span>
+                  <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                </button>
+                
+                <div id="file-menu-dropdown" class="menu-dropdown py-1 mt-1">
+                  <!--
+                  <div class="menu-item" onclick="triggerImageUpload()">
+                    <i class="fa-regular fa-image text-blue-600 w-4"></i>
+                    <span>Insert Image...</span>
+                  </div>
+                  -->
+                  <!--
+                  <div class="h-[1px] bg-slate-100 my-1"></div>
+                  <div class="menu-item" onclick="exportToDocx()">
+                    <i class="fa-regular fa-file-word text-blue-600 w-4"></i>
+                    <span>Save as Microsoft Word (.docx)</span>
+                  </div>
+                  -->
+                  <div class="menu-item" onclick="exportToOdt()">
+                    <i class="fa-regular fa-file-lines text-amber-600 w-4"></i>
+                    <span>Save as OpenDocument (.odt)</span>
+                  </div>
+                  <!--<div class="menu-item" onclick="window.print()">-->
+                  <div class="menu-item" onclick="printDocument()">
+                    <i class="fa-solid fa-print text-slate-500 w-4"></i>
+                    <span>Print...</span>
+                  </div>
+                </div>
+              </div>
+
+              <!--Kyeboard-->
+              <div class="relative">
+                <button id="keyboard-menu-btn" class="hover:bg-slate-100 px-2 py-0.5 rounded font-medium flex items-center space-x-1">
+                  <span>Keyboard</span>
+                  <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                </button>
+
+                <div id="keyboard-menu-dropdown" class="menu-dropdown py-1 mt-1">
+                  <div class="menu-item" onclick="toggleOSK()">
+                    <i class="fa-regular fa-image text-blue-600 w-4"></i>
+                    <span id="osk-check">? </span>On-Screen Keyboard
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Insert Menu Dropdown trigger -->
+              <div class="relative">
+                <button id="insert-menu-btn" class="hover:bg-slate-100 px-2 py-0.5 rounded font-medium flex items-center space-x-1">
+                  <span>Insert</span>
+                  <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                </button>
+
+                <div id="insert-menu-dropdown" class="menu-dropdown py-1 mt-1">
+                  <div class="menu-item" onclick="triggerImageUpload()">
+                    <i class="fa-regular fa-image text-blue-600 w-4"></i>
+                    <span>Image from Device</span>
+                  </div>
+                </div>
+              </div>
+
+              <span>&bull;</span>
+              <span id="save-status" class="text-emerald-600 font-medium"><i class="fa-solid fa-cloud-check mr-1"></i> Saved to browser</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
+            <button id="zoom-out-btn" class="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm rounded transition" title="Zoom Out">
+              <i class="fa-solid fa-minus text-xs"></i>
+            </button>
+            <span id="zoom-label" class="text-xs font-semibold px-2 min-w-[45px] text-center text-slate-700">100%</span>
+            <button id="zoom-in-btn" class="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm rounded transition" title="Zoom In">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <!--
+          <button onclick="exportToDocx()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-2 rounded-lg transition shadow-sm">
+            <i class="fa-regular fa-file-word"></i>
+            <span>Save .DOCX</span>
+          </button>
+          -->        
+          <!--  
+            <button  onclick="location.href='/';" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-2 rounded-lg transition shadow-sm">
+              <i class="fa-regular fa-file-word"></i>
+              <span>Home</span>
+            </button> 
+          -->
+        </div>
+      </div>
+
+      <!-- Formatting Toolbar (Quill integration) -->
+      <div id="toolbar-container" class="flex flex-wrap items-center px-4 py-1.5 gap-1 text-slate-700 bg-slate-50/50">
+        <!-- Font Family -->
+        <span class="ql-formats">
+          <select class="ql-font">
+            <option value="khmer-os">Khmer OS</option>
+            <option value="noto-sans-khmer" selected>Noto Sans Khmer</option>
+            <option value="khmer-ui">Khmer UI</option>
+            <option value="sans-serif">sans-serif</option>
+            <option value="calibri">Calibri</option>
+            <option value="inter">Inter</option>
+            <option value="lora">Lora</option>
+            <option value="roboto-mono">Monospace</option>
+            <option value="open-sans">Open Sans</option>
+          </select>
+        </span>
+
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+
+        <span class="ql-formats">
+          <select class="ql-size">
+            <option value="small">Small</option>
+            <option value="normal" selected>Normal</option>
+            <option value="large">Large</option>
+            <option value="huge">Huge</option>
+          </select>
+        </span>
+
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+
+        <!-- Text Style -->
+        <span class="ql-formats">
+          <button class="ql-bold" title="Bold"></button>
+          <button class="ql-italic" title="Italic"></button>
+          <button class="ql-underline" title="Underline"></button>
+          <button class="ql-strike" title="Strikethrough"></button>
+        </span>
+
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+
+        <!-- Text Colors -->
+        <span class="ql-formats">
+          <select class="ql-color" title="Text Color"></select>
+          <select class="ql-background" title="Highlight Color"></select>
+        </span>
+
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+
+        <!-- Alignment -->
+        <span class="ql-formats">
+          <button class="ql-align" value="" title="Align Left"></button>
+          <button class="ql-align" value="center" title="Align Center"></button>
+          <button class="ql-align" value="right" title="Align Right"></button>
+          <button class="ql-align" value="justify" title="Justify"></button>
+        </span>
+
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+
+        <!-- Lists and Indent -->
+        <span class="ql-formats">
+          <button class="ql-list" value="ordered" title="Numbered List"></button>
+          <button class="ql-list" value="bullet" title="Bullet List"></button>
+          <button class="ql-indent" value="-1" title="Decrease Indent"></button>
+          <button class="ql-indent" value="+1" title="Increase Indent"></button>
+        </span>
+
+        <div class="h-5 w-[1px] bg-slate-300 mx-1"></div>
+
+        <!-- Media & Link Options -->
+        <span class="ql-formats">
+          <button class="ql-image" title="Insert Image"></button>
+          <button class="ql-link" title="Insert Link"></button>
+          <button class="ql-blockquote" title="Blockquote"></button>
+          <button class="ql-code-block" title="Code Block"></button>
+          <button class="ql-clean" title="Clear Formatting"></button>
+        </span>
+      </div>
+    </header>
+
+    <div id="workspace">
+      <!-- Top Left Ruler Corner -->
+      <div id="ruler-corner">
+        <span>in</span>
+      </div>
+
+      <!-- Horizontal Ruler -->
+      <div id="ruler-horizontal">
+        <canvas id="canvas-h" class="ruler-canvas"></canvas>
+        <!-- Draggable Left Margin Handle -->
+        <div id="handle-margin-left" class="drag-handle drag-handle-h" title="Left Margin">
+          <div class="marker-pin-h"></div>
+        </div>
+        <!-- Draggable Right Margin Handle -->
+        <div id="handle-margin-right" class="drag-handle drag-handle-h" title="Right Margin">
+          <div class="marker-pin-h"></div>
+        </div>
+      </div>
+
+      <!-- Vertical Ruler -->
+      <div id="ruler-vertical">
+        <canvas id="canvas-v" class="ruler-canvas"></canvas>
+        <!-- Draggable Top Margin Handle -->
+        <div id="handle-margin-top" class="drag-handle drag-handle-v" title="Top Margin">
+          <div class="marker-pin-v"></div>
+        </div>
+        <!-- Draggable Bottom Margin Handle -->
+        <div id="handle-margin-bottom" class="drag-handle drag-handle-v" title="Bottom Margin">
+          <div class="marker-pin-v"></div>
+        </div>
+      </div>
+
+      <!-- Document Viewport -->
+      <div id="document-viewport">
+        <!-- Initial Page Shell -->
+        <div class="page-sheet active-page" data-page-index="1">
+          <div class="page-header">
+            <span>Document Header</span>
+            <span class="doc-subtitle-header">Word Processor</span>
+          </div>
+          
+          <div class="page-content">
+            <div id="editor">
+              <!--
+              <h2>Welcome to the Next-Gen Rich Text Word Processor</h2>
+              <p>This editor combines the simplicity of <strong>Quill.js</strong> with real-time interactive <strong>rulers</strong>, <strong>draggable margins</strong>, dynamic <strong>file exports (.docx and .odt)</strong>, and image embedding.</p>
+              <h3>New Features to Try:</h3>
+              <ul>
+                <li><strong>File Menu:</strong> Click on <em>File</em> at the top left to save as <strong>.docx</strong> (Microsoft Word) or <strong>.odt</strong> (OpenDocument/LibreOffice).</li>
+                <li><strong>Insert Images:</strong> Click <em>Insert Image</em> in the File/Insert menu or use the image icon on the formatting bar to embed images into your document.</li>
+                <li><strong>Interactive Rulers:</strong> Drag the blue margin pointers on the top and left rulers to adjust page boundaries in real time.</li>
+                <li><strong>Auto-Pagination:</strong> Type or insert images to see page counts and pagination update smoothly.</li>
+              </ul>
+              -->
+            </div>
+          </div>
+
+          <div class="page-footer">
+            <span>Page <span class="page-num">1</span> of <span class="total-pages">1</span></span>
+            <span>Confidential</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-time Alignment Guides -->
+    <div id="guide-v" class="guide-line-v"></div>
+    <div id="guide-h" class="guide-line-h"></div>
+
+    <!-- Bottom Page Info & Stats Bar -->
+    <footer class="bg-white border-t border-slate-200 px-4 py-1.5 flex items-center justify-between text-xs text-slate-500 z-30">
+      <div class="flex items-center space-x-4">
+        <span><i class="fa-regular fa-file mr-1"></i> Page <strong id="current-page-display" class="text-slate-700">1</strong> of <strong id="total-pages-display" class="text-slate-700">1</strong></span>
+        <span>&bull;</span>
+        <span><i class="fa-solid fa-font mr-1"></i> <strong id="word-count-display" class="text-slate-700">0</strong> words</span>
+        <span>&bull;</span>
+        <span><strong id="char-count-display" class="text-slate-700">0</strong> characters</span>
+      </div>
+      <div class="flex items-center space-x-3 text-slate-400">
+        <span>Letter (8.5" &times; 11")</span>
+        <span>&bull;</span>
+        <span>Standard Margins (1")</span>
+      </div>
+    </footer>
+
+    <!-- Quill JS Import -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- Floating On-Screen Keyboard Panel -->
+    <div id="osk-panel">
+      <div id="osk-header">
+        <span id="osk-title">Khmer Smart Writer Overlay</span>
+        <div id="osk-close" onclick="toggleOSK()">?</div>
+      </div>
+      <div class="keyboard" id="keyboard-grid">
+        <!-- Dynamic Keyboard Layout Injected via JS -->
+      </div>
+    </div>
+	  <script src="/javascripts/main.js?v=1.0.1"></script>
+    <script src="/javascripts/khmer-osk.js?v=1.0.1"></script>
+  </body>
+</html>
