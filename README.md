@@ -1,6 +1,7 @@
 # KSWQ
 
 Khmer Smart Writer Quill with - On-Screen Keyboard (Word Processor)
+<img width="920" height="392" alt="image" src="https://github.com/user-attachments/assets/37137f34-9065-4ae2-860f-b20a409dfc40" />
 
 A Node.js and Express web application server for **KSWQ**.
 
@@ -51,5 +52,5 @@ git add README.md
 git commit -m "Add project README.md"
 git push
 
-<img width="920" height="392" alt="image" src="https://github.com/user-attachments/assets/021338f3-7e76-4dac-b0b6-56772f5f582e" />
+
 
